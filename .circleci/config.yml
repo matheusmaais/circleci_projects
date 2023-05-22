@@ -1,14 +1,30 @@
 version: 2.1  
 
 jobs:
-  build_container:
+  build:
     machine:
       image: ubuntu-2204:2022.07.1
+    parameters:
+      environment:
+        type: string
     steps: 
-      -  checkout
-      -  run: docker build -t node-app:latest .
+      - checkout
+      - restore_cache: ## restore previous cache layer, if exists, using the checksum of Dockerfile
+          keys:
+            - docker-{{ checksum "Dockerfile" }}
+      -  run: |
+          tag= <<parameters.environment>>-$CIRCLE_SHA1
+          docker build -t --cache-from $tag -t $tag. 
+      - save_cache:
+          key: docker-{{ checksum "Dockerfile" }}
+          paths:
+            - /tmp/docker
 
 workflows:
+  version: 2
   build:
     jobs:
-      -  build_container
+      - build:
+          matrix:
+            parameters:
+              environment: ["dev", "qa", "prod"]
