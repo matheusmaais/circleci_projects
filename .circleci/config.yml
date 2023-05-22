@@ -4,18 +4,16 @@ jobs:
   build_containers:
     machine:
       image: ubuntu-2204:2022.07.1
+      docker_layer_caching: true
     parallelism: 3
     parameters:
       environment:
         type: string
     steps: 
       - checkout
-      - restore_cache: ## restore previous cache layer, if exists, using the checksum of Dockerfile
-          keys:
-            - docker-{{ checksum "Dockerfile" }}
       -  run: |
           tag=<<parameters.environment>>-$CIRCLE_SHA1
-          docker build -t --cache-from $tag -t $tag. 
+          docker build -t $tag . 
       - save_cache:
           key: docker-{{ checksum "Dockerfile" }}
           paths:
