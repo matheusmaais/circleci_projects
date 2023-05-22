@@ -1,0 +1,14 @@
+version: 2.1  
+
+jobs:
+  build_container:
+    machine:
+      image: ubuntu-2204:2022.07.1
+    steps: 
+      -  checkout
+      -  run: docker build -t node-app:latest .
+
+workflows:
+  build:
+    jobs:
+      -  build_container
